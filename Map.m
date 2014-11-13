@@ -146,7 +146,7 @@
     {
         CGFloat startPointForWall = 0;
         CGFloat wallLength = 0;
-        for ( NSInteger x = 0; x <= self.tiles.gridSize.width; x++ )
+        for ( NSInteger x = 0; x < self.tiles.gridSize.width; x++ )
         {
             CGPoint tileCoordinate = CGPointMake(x, y);
             // 1
