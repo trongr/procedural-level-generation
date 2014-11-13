@@ -28,8 +28,11 @@ static const CGFloat kPlayerMovementSpeed = 100.0f;
 @property (nonatomic) NSUInteger playerAnimationID; // 0 = idle; 1 = walk
 @end
 
-
 @implementation MyScene
+
+const int MAP_WIDTH = 64;
+const int MAP_HEIGHT = 64;
+const int MAP_MAX_FLOOR_COUNT = 64;
 
 - (id)initWithSize:(CGSize)size
 {
@@ -45,7 +48,9 @@ static const CGFloat kPlayerMovementSpeed = 100.0f;
         self.spriteAtlas = [SKTextureAtlas atlasNamed:@"sprites"];
         
         // Create a new map
-        self.map = [[Map alloc] init];
+        self.map = [[Map alloc] initWithGridSize:CGSizeMake(MAP_WIDTH, MAP_HEIGHT)];
+        self.map.maxFloorCount = MAP_MAX_FLOOR_COUNT;
+        [self.map generate];
         
         // Create the exit
         self.exit = [SKSpriteNode spriteNodeWithTexture:[self.spriteAtlas textureNamed:@"exit"]];

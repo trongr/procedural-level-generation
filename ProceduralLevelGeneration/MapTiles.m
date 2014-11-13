@@ -17,8 +17,6 @@
 
 - (void) dealloc
 {
-    // ARC will not automatically dealloc memory allocated via calloc
-    // so we do it manually
     if ( self.tiles )
     {
         free(self.tiles);
@@ -31,14 +29,9 @@
 {
     if (( self = [super init] ))
     {
-        // Set properties
         _gridSize = size;
         _count = (NSUInteger) size.width * size.height;
-        
-        // Allocate memory for tiles. calloc will initialize all values to 0 = TileTypeEmpty
         self.tiles = calloc(self.count, sizeof(NSInteger));
-        
-        // Fail gracefully if memory could not be allocated
         NSAssert(self.tiles, @"Could not allocate memory for tiles");
     }
     return self;
@@ -104,6 +97,8 @@
 {
     NSMutableString *tileMapDescription = [NSMutableString stringWithFormat:@"<%@ = %p | \n", [self class], self];
     
+//    todo. this assumes x and y go right and up positive. might want to go right and down like regular programming convention.
+//    the generateTileGrid in Map.m does the opposite! it thinks up is y--
     for ( NSInteger y = ((NSInteger)self.gridSize.height - 1); y >= 0; y-- )
     {
         [tileMapDescription appendString:[NSString stringWithFormat:@"[%i]", y]];
