@@ -11,6 +11,8 @@
 
 @interface Map ()
 @property (nonatomic) MapTiles* tiles;
+@property (nonatomic) SKTextureAtlas *tileAtlas;
+@property (nonatomic) CGFloat tileSize;
 @end
 
 @implementation Map
@@ -27,8 +29,32 @@
         self.gridSize = gridSize;
         _spawnPoint = CGPointZero;
         _exitPoint = CGPointZero;
+        
+        self.tileAtlas = [SKTextureAtlas atlasNamed:@"tiles"];
+        NSArray *textureNames = [self.tileAtlas textureNames];
+        SKTexture *tileTexture = [self.tileAtlas textureNamed:(NSString *)[textureNames firstObject]];
+        self.tileSize = tileTexture.size.width;
     }
     return self;
+}
+
+- (void) generateTiles
+{
+    for ( NSInteger y = 0; y < self.tiles.gridSize.height; y++ )
+    {
+        for ( NSInteger x = 0; x < self.tiles.gridSize.width; x++ )
+        {
+            CGPoint tileCoordinate = CGPointMake(x, y);
+            MapTileType tileType = [self.tiles tileTypeAt:tileCoordinate];
+            if ( tileType != MapTileTypeNone )
+            {
+                SKTexture *tileTexture = [self.tileAtlas textureNamed:[NSString stringWithFormat:@"%i", tileType]];
+                SKSpriteNode *tile = [SKSpriteNode spriteNodeWithTexture:tileTexture];
+                tile.position = [self convertMapCoordinateToWorldCoordinate:tileCoordinate];
+                [self addChild:tile];
+            }
+        }
+    }
 }
 
 - (void) generateTileGrid
@@ -38,6 +64,7 @@
     [self.tiles setTileType:MapTileTypeFloor at:startPoint];
     NSUInteger currentFloorCount = 1;
     CGPoint currentPosition = startPoint;
+    _spawnPoint = [self convertMapCoordinateToWorldCoordinate:startPoint];
     
     while ( currentFloorCount < self.maxFloorCount )
     {
@@ -47,10 +74,10 @@
         switch ( direction )
         {
             case 1: // Up
-                newPosition = CGPointMake(currentPosition.x, currentPosition.y - 1);
+                newPosition = CGPointMake(currentPosition.x, currentPosition.y + 1);
                 break;
             case 2: // Down
-                newPosition = CGPointMake(currentPosition.x, currentPosition.y + 1);
+                newPosition = CGPointMake(currentPosition.x, currentPosition.y - 1);
                 break;
             case 3: // Left
                 newPosition = CGPointMake(currentPosition.x - 1, currentPosition.y);
@@ -66,16 +93,22 @@
         {
             currentPosition = newPosition;
             [self.tiles setTileType:MapTileTypeFloor at:currentPosition];
-            currentFloorCount++;
         }
+        currentFloorCount++; // putting this guy cause otw can't get out of while loop
     }
-    _exitPoint = currentPosition;
+    _exitPoint = [self convertMapCoordinateToWorldCoordinate:currentPosition];
     NSLog(@"%@", [self.tiles description]);
 }
 
 - (void) generate {
     self.tiles = [[MapTiles alloc] initWithGridSize:self.gridSize];
     [self generateTileGrid];
+    [self generateTiles];
+}
+
+- (CGPoint) convertMapCoordinateToWorldCoordinate:(CGPoint)mapCoordinate
+{
+    return CGPointMake(mapCoordinate.x * self.tileSize, mapCoordinate.y * self.tileSize);
 }
 
 // returns random int in [min, max]

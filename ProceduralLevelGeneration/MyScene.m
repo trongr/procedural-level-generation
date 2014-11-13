@@ -32,7 +32,7 @@ static const CGFloat kPlayerMovementSpeed = 100.0f;
 
 const int MAP_WIDTH = 64;
 const int MAP_HEIGHT = 64;
-const int MAP_MAX_FLOOR_COUNT = 64;
+const int MAP_MAX_FLOOR_COUNT = 256;
 
 - (id)initWithSize:(CGSize)size
 {

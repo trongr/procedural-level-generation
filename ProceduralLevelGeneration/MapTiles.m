@@ -97,8 +97,6 @@
 {
     NSMutableString *tileMapDescription = [NSMutableString stringWithFormat:@"<%@ = %p | \n", [self class], self];
     
-//    todo. this assumes x and y go right and up positive. might want to go right and down like regular programming convention.
-//    the generateTileGrid in Map.m does the opposite! it thinks up is y--
     for ( NSInteger y = ((NSInteger)self.gridSize.height - 1); y >= 0; y-- )
     {
         [tileMapDescription appendString:[NSString stringWithFormat:@"[%i]", y]];
