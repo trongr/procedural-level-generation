@@ -8,6 +8,7 @@
 
 #import "Map.h"
 #import "MapTiles.h"
+#import "MyScene.h"
 
 @interface Map ()
 @property (nonatomic) MapTiles* tiles;
@@ -118,9 +119,58 @@
     self.tiles = [[MapTiles alloc] initWithGridSize:self.gridSize];
     [self generateTileGrid];
     [self generateWallGrid];
+    [self generateCollisionWalls];
     [self generateTiles];
     _spawnPoint = [self convertMapCoordinateToWorldCoordinate:_spawnPoint];
     _exitPoint = [self convertMapCoordinateToWorldCoordinate:_exitPoint];
+}
+
+- (void) addCollisionWallAtPosition:(CGPoint)position withSize:(CGSize)size
+{
+    SKNode *wall = [SKNode node];
+    
+    wall.position = CGPointMake(position.x + size.width * 0.5f - 0.5f * self.tileSize,
+                                position.y - size.height * 0.5f + 0.5f * self.tileSize);
+    wall.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:size];
+    wall.physicsBody.dynamic = NO;
+    wall.physicsBody.categoryBitMask = CollisionTypeWall;
+    wall.physicsBody.contactTestBitMask = 0;
+    wall.physicsBody.collisionBitMask = CollisionTypePlayer;
+    
+    [self addChild:wall];
+}
+
+- (void) generateCollisionWalls
+{
+    for ( NSInteger y = 0; y < self.tiles.gridSize.height; y++ )
+    {
+        CGFloat startPointForWall = 0;
+        CGFloat wallLength = 0;
+        for ( NSInteger x = 0; x <= self.tiles.gridSize.width; x++ )
+        {
+            CGPoint tileCoordinate = CGPointMake(x, y);
+            // 1
+            if ( [self.tiles tileTypeAt:tileCoordinate] == MapTileTypeWall )
+            {
+                if ( startPointForWall == 0 && wallLength == 0 )
+                {
+                    // startPointForWall is the first wall tile you see, and it goes on for wallLength tiles
+                    startPointForWall = x;
+                }
+                wallLength += 1;
+            }
+            // 2
+            else if ( wallLength > 0 )
+            {
+                CGPoint wallOrigin = CGPointMake(startPointForWall, y);
+                CGSize wallSize = CGSizeMake(wallLength * self.tileSize, self.tileSize);
+                [self addCollisionWallAtPosition:[self convertMapCoordinateToWorldCoordinate:wallOrigin]
+                                        withSize:wallSize];
+                startPointForWall = 0;
+                wallLength = 0;
+            }
+        }
+    }
 }
 
 - (CGPoint) convertMapCoordinateToWorldCoordinate:(CGPoint)mapCoordinate
