@@ -64,13 +64,12 @@
     [self.tiles setTileType:MapTileTypeFloor at:startPoint];
     NSUInteger currentFloorCount = 1;
     CGPoint currentPosition = startPoint;
-    _spawnPoint = [self convertMapCoordinateToWorldCoordinate:startPoint];
+    _spawnPoint = startPoint;
     
     while ( currentFloorCount < self.maxFloorCount )
     {
         NSInteger direction = [self randomNumberBetweenMin:1 andMax:4];
         CGPoint newPosition;
-     
         switch ( direction )
         {
             case 1: // Up
@@ -96,14 +95,32 @@
         }
         currentFloorCount++; // putting this guy cause otw can't get out of while loop
     }
-    _exitPoint = [self convertMapCoordinateToWorldCoordinate:currentPosition];
+    _exitPoint = currentPosition;
     NSLog(@"%@", [self.tiles description]);
+}
+
+- (void) generateWallGrid
+{
+    for ( NSInteger y = 0; y < self.tiles.gridSize.height; y++ )
+    {
+        for ( NSInteger x = 0; x < self.tiles.gridSize.width; x++ )
+        {
+            CGPoint tileCoordinate = CGPointMake(x, y);
+            if ( [self.tiles tileTypeAt:tileCoordinate] == MapTileTypeNone )
+            {
+                [self.tiles setTileType:MapTileTypeWall at:tileCoordinate];
+            }
+        }
+    }
 }
 
 - (void) generate {
     self.tiles = [[MapTiles alloc] initWithGridSize:self.gridSize];
     [self generateTileGrid];
+    [self generateWallGrid];
     [self generateTiles];
+    _spawnPoint = [self convertMapCoordinateToWorldCoordinate:_spawnPoint];
+    _exitPoint = [self convertMapCoordinateToWorldCoordinate:_exitPoint];
 }
 
 - (CGPoint) convertMapCoordinateToWorldCoordinate:(CGPoint)mapCoordinate
@@ -114,7 +131,7 @@
 // returns random int in [min, max]
 - (NSInteger) randomNumberBetweenMin:(NSInteger)min andMax:(NSInteger)max
 {
-    return min + arc4random() % (max - min);
+    return min + arc4random() % (max - min + 1);
 }
 
 
