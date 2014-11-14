@@ -20,13 +20,12 @@
 
 @implementation Map
 
-const int MAX_NUM_WALKERS = 5; // number of random walkers
-
 + (instancetype) mapWithGridSize:(CGSize)gridSize
 {
     return [[self alloc] initWithGridSize:gridSize];
 }
 
+// todo debug. maxFloorCount should be less than gridSize.width * gridSize.height
 - (instancetype) initWithGridSize:(CGSize)gridSize
 {
     if (( self = [super init] ))
@@ -34,6 +33,12 @@ const int MAX_NUM_WALKERS = 5; // number of random walkers
         self.gridSize = gridSize;
         _spawnPoint = CGPointZero;
         _exitPoint = CGPointZero;
+        
+        // defaults if user doesn't specify
+        self.maxFloorCount = 256;
+        self.turnProb = 50; // 0-100 less-more likely to turn
+        self.floorMakerSpawnProbability = 25; // 0-100 again. TODO use 0-1 to follow convention
+        self.maxFloorMakerCount = 5;
         
         self.tileAtlas = [SKTextureAtlas atlasNamed:@"tiles"];
         NSArray *textureNames = [self.tileAtlas textureNames];
@@ -71,17 +76,19 @@ const int MAX_NUM_WALKERS = 5; // number of random walkers
 
     self.floorMakers = [NSMutableArray array];
     [self.floorMakers addObject:[[FloorMaker alloc] initWithCurrentPosition:startPoint andDirection:0]];
-    __block int currentNumWalkers = 1;
     __block NSUInteger currentFloorCount = 1;
     
-//    starts walking with one random walker. at every step 50-50 chance of adding another walker per current walker, at current walker's current position. the last walker sets the exit point with its current position.
+    // starts walking with one random walker. at every step 50-50 chance of adding another walker per current walker, at current walker's current position. the last walker sets the exit point with its current position.
     __block int actualFloorCount = 0;
     __block int dupFloorCount = 0;
     while ( currentFloorCount < self.maxFloorCount )
     {
         [self.floorMakers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             FloorMaker *floorMaker = (FloorMaker *)obj;
-            floorMaker.direction = [self randomNumberBetweenMin:1 andMax:4];
+            // only turn if floor maker has no direction (initially) or based on turn probability: the bigger the turnProb, the more likely the walker turns
+            if ( floorMaker.direction == 0 || [self randomNumberBetweenMin:0 andMax:100] < self.turnProb ){
+                floorMaker.direction = [self randomNumberBetweenMin:1 andMax:4];
+            }
             CGPoint newPosition;
             switch ( floorMaker.direction )
             {
@@ -111,8 +118,8 @@ const int MAX_NUM_WALKERS = 5; // number of random walkers
             currentFloorCount++;
             _exitPoint = floorMaker.currentPosition;
 
-            if ([self randomNumberBetweenMin:0 andMax:100] < 50 &&
-                currentNumWalkers++ < MAX_NUM_WALKERS){
+            if ( [self randomNumberBetweenMin:0 andMax:100] <= self.floorMakerSpawnProbability &&
+                [self.floorMakers count] < self.maxFloorMakerCount ){
                 
                 FloorMaker *newFloorMaker = [[FloorMaker alloc] initWithCurrentPosition:floorMaker.currentPosition andDirection:[self randomNumberBetweenMin:1 andMax:4]];
                 [self.floorMakers addObject:newFloorMaker];

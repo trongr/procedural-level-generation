@@ -49,7 +49,10 @@ const int MAP_MAX_FLOOR_COUNT = 256;
         
         // Create a new map
         self.map = [[Map alloc] initWithGridSize:CGSizeMake(MAP_WIDTH, MAP_HEIGHT)];
-        self.map.maxFloorCount = MAP_MAX_FLOOR_COUNT;
+        self.map.maxFloorCount = 256;
+        self.map.maxFloorMakerCount = 3;
+        self.map.floorMakerSpawnProbability = 20;
+        self.map.turnProb = 30;
         [self.map generate];
         
         // Create the exit
