@@ -71,6 +71,9 @@
     self.floorMakers = [NSMutableArray array];
     [self.floorMakers addObject:[[FloorMaker alloc] initWithCurrentPosition:startPoint andDirection:0]];
     
+//    starts walking with one random walker. at every step 50-50 chance of adding another walker per current walker, at current walker's current position. the last walker sets the exit point with its current position.
+    __block int walkerCount = 1;
+    __block int actualFloorCount = 0;
     while ( currentFloorCount < self.maxFloorCount )
     {
         [self.floorMakers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
@@ -92,19 +95,30 @@
                     newPosition = CGPointMake(floorMaker.currentPosition.x + 1, floorMaker.currentPosition.y);
                     break;
             }
-            
             if([self.tiles isValidTileCoordinateAt:newPosition] &&
                ![self.tiles isEdgeTileAt:newPosition] &&
-               [self.tiles tileTypeAt:newPosition] == MapTileTypeNone)
+               [self.tiles tileTypeAt:newPosition] == MapTileTypeNone &&
+               currentFloorCount < self.maxFloorCount)
             {
                 floorMaker.currentPosition = newPosition;
                 [self.tiles setTileType:MapTileTypeFloor at:floorMaker.currentPosition];
+                actualFloorCount++;
             }
-            currentFloorCount++; // putting this guy cause otw can't get out of while loop
+//            the actual tile count is going to be less than the max tile count because we increment it whether it's a new floor tile or not. the alternative is to have extra cases and it makes the code needlessly complicated at this point.
+            currentFloorCount++;
             _exitPoint = floorMaker.currentPosition;
+
+            if ( [self randomNumberBetweenMin:0 andMax:1] < 1 ) // original code goes between 0 and 100 and checks <= 50. does this make it more random?
+            {
+                FloorMaker *newFloorMaker = [[FloorMaker alloc] initWithCurrentPosition:floorMaker.currentPosition andDirection:[self randomNumberBetweenMin:1 andMax:4]];
+                [self.floorMakers addObject:newFloorMaker];
+                NSLog(@"adding another walker. total: %i", ++walkerCount);
+            }
         }];
     }
     NSLog(@"%@", [self.tiles description]);
+    NSLog(@"currentFloorCount %i", currentFloorCount);
+    NSLog(@"actual floor count %i", actualFloorCount);
 }
 
 - (void) generateWallGrid
@@ -156,6 +170,7 @@
         for ( NSInteger x = 0; x < self.tiles.gridSize.width; x++ )
         {
             BOOL isWall = [self.tiles tileTypeAt:CGPointMake(x, y)] == MapTileTypeWall;
+            // add the wall tile to the current wall
             if (isWall)
             {
                 if ( startPointForWall == 0 && wallLength == 0 )
@@ -165,6 +180,7 @@
                 }
                 wallLength += 1;
             }
+            // actually create the wall
             if ((!isWall && wallLength > 0) || (x == self.tiles.gridSize.width - 1)){
                 CGPoint wallOrigin = CGPointMake(startPointForWall, y);
                 CGSize wallSize = CGSizeMake(wallLength * self.tileSize, self.tileSize);
