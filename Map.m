@@ -20,6 +20,8 @@
 
 @implementation Map
 
+const int MAX_NUM_WALKERS = 5; // number of random walkers
+
 + (instancetype) mapWithGridSize:(CGSize)gridSize
 {
     return [[self alloc] initWithGridSize:gridSize];
@@ -67,13 +69,14 @@
 
     [self.tiles setTileType:MapTileTypeFloor at:startPoint];
 
-    __block NSUInteger currentFloorCount = 1;
     self.floorMakers = [NSMutableArray array];
     [self.floorMakers addObject:[[FloorMaker alloc] initWithCurrentPosition:startPoint andDirection:0]];
+    __block int currentNumWalkers = 1;
+    __block NSUInteger currentFloorCount = 1;
     
 //    starts walking with one random walker. at every step 50-50 chance of adding another walker per current walker, at current walker's current position. the last walker sets the exit point with its current position.
-    __block int walkerCount = 1;
     __block int actualFloorCount = 0;
+    __block int dupFloorCount = 0;
     while ( currentFloorCount < self.maxFloorCount )
     {
         [self.floorMakers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
@@ -95,30 +98,31 @@
                     newPosition = CGPointMake(floorMaker.currentPosition.x + 1, floorMaker.currentPosition.y);
                     break;
             }
-            if([self.tiles isValidTileCoordinateAt:newPosition] &&
-               ![self.tiles isEdgeTileAt:newPosition] &&
-               [self.tiles tileTypeAt:newPosition] == MapTileTypeNone &&
-               currentFloorCount < self.maxFloorCount)
-            {
+            if ([self.tiles isValidTileCoordinateAt:newPosition] &&
+                ![self.tiles isEdgeTileAt:newPosition] &&
+                [self.tiles tileTypeAt:newPosition] == MapTileTypeNone){
+                
                 floorMaker.currentPosition = newPosition;
                 [self.tiles setTileType:MapTileTypeFloor at:floorMaker.currentPosition];
                 actualFloorCount++;
+            } else if ([self.tiles tileTypeAt:newPosition] == MapTileTypeFloor) {
+                dupFloorCount++;
             }
-//            the actual tile count is going to be less than the max tile count because we increment it whether it's a new floor tile or not. the alternative is to have extra cases and it makes the code needlessly complicated at this point.
             currentFloorCount++;
             _exitPoint = floorMaker.currentPosition;
 
-            if ( [self randomNumberBetweenMin:0 andMax:1] < 1 ) // original code goes between 0 and 100 and checks <= 50. does this make it more random?
-            {
+            if ([self randomNumberBetweenMin:0 andMax:100] < 50 &&
+                currentNumWalkers++ < MAX_NUM_WALKERS){
+                
                 FloorMaker *newFloorMaker = [[FloorMaker alloc] initWithCurrentPosition:floorMaker.currentPosition andDirection:[self randomNumberBetweenMin:1 andMax:4]];
                 [self.floorMakers addObject:newFloorMaker];
-                NSLog(@"adding another walker. total: %i", ++walkerCount);
             }
         }];
     }
     NSLog(@"%@", [self.tiles description]);
     NSLog(@"currentFloorCount %i", currentFloorCount);
     NSLog(@"actual floor count %i", actualFloorCount);
+    NSLog(@"dup floor count %i", dupFloorCount);
 }
 
 - (void) generateWallGrid
