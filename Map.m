@@ -8,6 +8,7 @@
 
 #import "Map.h"
 #import "MapTiles.h"
+#import "FloorMaker.h"
 #import "MyScene.h"
 
 @interface Map ()
@@ -64,26 +65,26 @@
     
     [self.tiles setTileType:MapTileTypeFloor at:startPoint];
     NSUInteger currentFloorCount = 1;
-    CGPoint currentPosition = startPoint;
+    FloorMaker* floorMaker = [[FloorMaker alloc] initWithCurrentPosition:startPoint andDirection:0];
     _spawnPoint = startPoint;
     
     while ( currentFloorCount < self.maxFloorCount )
     {
-        NSInteger direction = [self randomNumberBetweenMin:1 andMax:4];
+        floorMaker.direction = [self randomNumberBetweenMin:1 andMax:4];
         CGPoint newPosition;
-        switch ( direction )
+        switch ( floorMaker.direction )
         {
             case 1: // Up
-                newPosition = CGPointMake(currentPosition.x, currentPosition.y + 1);
+                newPosition = CGPointMake(floorMaker.currentPosition.x, floorMaker.currentPosition.y + 1);
                 break;
             case 2: // Down
-                newPosition = CGPointMake(currentPosition.x, currentPosition.y - 1);
+                newPosition = CGPointMake(floorMaker.currentPosition.x, floorMaker.currentPosition.y - 1);
                 break;
             case 3: // Left
-                newPosition = CGPointMake(currentPosition.x - 1, currentPosition.y);
+                newPosition = CGPointMake(floorMaker.currentPosition.x - 1, floorMaker.currentPosition.y);
                 break;
             case 4: // Right
-                newPosition = CGPointMake(currentPosition.x + 1, currentPosition.y);
+                newPosition = CGPointMake(floorMaker.currentPosition.x + 1, floorMaker.currentPosition.y);
                 break;
         }
     
@@ -91,12 +92,12 @@
            ![self.tiles isEdgeTileAt:newPosition] &&
            [self.tiles tileTypeAt:newPosition] == MapTileTypeNone)
         {
-            currentPosition = newPosition;
-            [self.tiles setTileType:MapTileTypeFloor at:currentPosition];
+            floorMaker.currentPosition = newPosition;
+            [self.tiles setTileType:MapTileTypeFloor at:floorMaker.currentPosition];
         }
         currentFloorCount++; // putting this guy cause otw can't get out of while loop
     }
-    _exitPoint = currentPosition;
+    _exitPoint = floorMaker.currentPosition;
     NSLog(@"%@", [self.tiles description]);
 }
 

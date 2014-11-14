@@ -26,6 +26,7 @@
 		449AF6D217B52CAD0004289F /* MyScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 449AF6D117B52CAD0004289F /* MyScene.m */; };
 		449AF6D617B52CAD0004289F /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 449AF6D517B52CAD0004289F /* Images.xcassets */; };
 		842CDE4C1A120EF1006296C6 /* Map.m in Sources */ = {isa = PBXBuildFile; fileRef = 842CDE4B1A120EF1006296C6 /* Map.m */; };
+		842CDE4F1A15B351006296C6 /* FloorMaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 842CDE4E1A15B351006296C6 /* FloorMaker.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +59,8 @@
 		449AF6DC17B52CAD0004289F /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		842CDE4A1A120EF1006296C6 /* Map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Map.h; path = ../Map.h; sourceTree = "<group>"; };
 		842CDE4B1A120EF1006296C6 /* Map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Map.m; path = ../Map.m; sourceTree = "<group>"; };
+		842CDE4D1A15B351006296C6 /* FloorMaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FloorMaker.h; sourceTree = "<group>"; };
+		842CDE4E1A15B351006296C6 /* FloorMaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FloorMaker.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,6 +127,8 @@
 				448D6B0017B7CAA3002FA381 /* DPad.m */,
 				842CDE4A1A120EF1006296C6 /* Map.h */,
 				842CDE4B1A120EF1006296C6 /* Map.m */,
+				842CDE4D1A15B351006296C6 /* FloorMaker.h */,
+				842CDE4E1A15B351006296C6 /* FloorMaker.m */,
 				449AF6CA17B52CAD0004289F /* Main.storyboard */,
 				448F951917B988DD00C1E2B6 /* MapTiles.h */,
 				448F951A17B988DD00C1E2B6 /* MapTiles.m */,
@@ -227,6 +232,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				448F951B17B988DD00C1E2B6 /* MapTiles.m in Sources */,
+				842CDE4F1A15B351006296C6 /* FloorMaker.m in Sources */,
 				842CDE4C1A120EF1006296C6 /* Map.m in Sources */,
 				448D6B0117B7D011002FA381 /* DPad.m in Sources */,
 				449AF6D217B52CAD0004289F /* MyScene.m in Sources */,
