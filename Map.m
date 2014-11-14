@@ -148,9 +148,8 @@
         CGFloat wallLength = 0;
         for ( NSInteger x = 0; x < self.tiles.gridSize.width; x++ )
         {
-            CGPoint tileCoordinate = CGPointMake(x, y);
-            // 1
-            if ( [self.tiles tileTypeAt:tileCoordinate] == MapTileTypeWall )
+            BOOL isWall = [self.tiles tileTypeAt:CGPointMake(x, y)] == MapTileTypeWall;
+            if (isWall)
             {
                 if ( startPointForWall == 0 && wallLength == 0 )
                 {
@@ -159,9 +158,7 @@
                 }
                 wallLength += 1;
             }
-            // 2
-            else if ( wallLength > 0 )
-            {
+            if ((!isWall && wallLength > 0) || (x == self.tiles.gridSize.width - 1)){
                 CGPoint wallOrigin = CGPointMake(startPointForWall, y);
                 CGSize wallSize = CGSizeMake(wallLength * self.tileSize, self.tileSize);
                 [self addCollisionWallAtPosition:[self convertMapCoordinateToWorldCoordinate:wallOrigin]
