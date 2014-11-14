@@ -40,6 +40,10 @@
         self.floorMakerSpawnProbability = 25; // 0-100 again. TODO use 0-1 to follow convention
         self.maxFloorMakerCount = 5;
         
+        self.roomProbability = 20;
+        self.roomMinSize = CGSizeMake(2, 2);
+        self.roomMaxSize = CGSizeMake(6, 6);
+        
         self.tileAtlas = [SKTextureAtlas atlasNamed:@"tiles"];
         NSArray *textureNames = [self.tileAtlas textureNames];
         SKTexture *tileTexture = [self.tileAtlas textureNamed:(NSString *)[textureNames firstObject]];
@@ -118,6 +122,18 @@
             currentFloorCount++;
             _exitPoint = floorMaker.currentPosition;
 
+            // generate room at current position
+            if ( [self randomNumberBetweenMin:0 andMax:100] < self.roomProbability )
+            {
+                NSUInteger roomSizeX = [self randomNumberBetweenMin:self.roomMinSize.width
+                                                             andMax:self.roomMaxSize.width];
+                NSUInteger roomSizeY = [self randomNumberBetweenMin:self.roomMinSize.height
+                                                             andMax:self.roomMaxSize.height];
+                
+                currentFloorCount += [self generateRoomAt:floorMaker.currentPosition
+                                                 withSize:CGSizeMake(roomSizeX, roomSizeY)];
+            }
+            
             if ( [self randomNumberBetweenMin:0 andMax:100] <= self.floorMakerSpawnProbability &&
                 [self.floorMakers count] < self.maxFloorMakerCount ){
                 
@@ -130,6 +146,7 @@
     NSLog(@"currentFloorCount %i", currentFloorCount);
     NSLog(@"actual floor count %i", actualFloorCount);
     NSLog(@"dup floor count %i", dupFloorCount);
+    NSLog(@"random walkers %i", [self.floorMakers count]);
 }
 
 - (void) generateWallGrid
@@ -202,6 +219,26 @@
             }
         }
     }
+}
+
+- (NSUInteger) generateRoomAt:(CGPoint)position withSize:(CGSize)size
+{
+    NSUInteger numberOfFloorsGenerated = 0;
+    for ( NSUInteger y = 0; y < size.height; y++)
+    {
+        for ( NSUInteger x = 0; x < size.width; x++ )
+        {
+            CGPoint tilePosition = CGPointMake(position.x + x, position.y + y);
+            if ([self.tiles isValidTileCoordinateAt:tilePosition] &&
+                ![self.tiles isEdgeTileAt:tilePosition] &&
+                [self.tiles tileTypeAt:tilePosition] == MapTileTypeNone){
+                
+                [self.tiles setTileType:MapTileTypeFloor at:tilePosition];
+                numberOfFloorsGenerated++;
+            }
+        }
+    }
+    return numberOfFloorsGenerated;
 }
 
 - (CGPoint) convertMapCoordinateToWorldCoordinate:(CGPoint)mapCoordinate

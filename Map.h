@@ -20,6 +20,11 @@
 @property (nonatomic) NSUInteger floorMakerSpawnProbability;
 @property (nonatomic) NSUInteger maxFloorMakerCount;
 
+// more options for room sizes
+@property (nonatomic) NSUInteger roomProbability;
+@property (nonatomic) CGSize roomMinSize;
+@property (nonatomic) CGSize roomMaxSize;
+
 + (instancetype) mapWithGridSize:(CGSize)gridSize;
 - (instancetype) initWithGridSize:(CGSize)gridSize;
 
